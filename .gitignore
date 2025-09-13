@@ -1,2 +1,5 @@
 android-studio/
 android-studio-2024.*
+.idea/
+.gradle/
+local.properties
