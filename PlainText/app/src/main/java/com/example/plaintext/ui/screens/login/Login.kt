@@ -258,4 +258,3 @@ fun LoginScreenPreview() {
           viewModel = LoginViewModel() // Instância simples para o preview
   )
 }
-
