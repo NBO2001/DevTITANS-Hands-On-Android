@@ -1,123 +1,85 @@
 package com.example.plaintext.ui.screens.hello
 
-
-import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import com.example.plaintext.R
+import com.example.plaintext.data.model.PasswordInfo
+import com.example.plaintext.data.repository.PasswordDBStore
 import com.example.plaintext.ui.screens.Screen
-import com.example.plaintext.ui.theme.PlainTextTheme
-import com.example.plaintext.ui.viewmodel.ListViewState
-import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class dbSimulator() {
-    private val datalist = mutableListOf<String>();
-
-    init {
-        for (i in 1..100) {
-            datalist.add("devtitans #$i");
-        }
-
-    }
-
-    fun getData(): Flow<List<String>> = flow {
-        delay(5000)
-        emit(datalist)
-    }
-}
-
-data class listViewState(
-    var listState: List<String> = emptyList(),
+data class ListViewState(
+    var listState: List<PasswordInfo> = emptyList(),
     var size: Int = 0
 )
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
-    private val dbSimulator: dbSimulator
+    private val passwordDBStore: PasswordDBStore
 ) : ViewModel() {
-    var listState by mutableStateOf(listViewState())
+    var listState by mutableStateOf(ListViewState())
         private set
+    private var dataList = mutableListOf<PasswordInfo>()
 
     init {
         viewModelScope.launch {
+            if (passwordDBStore.isEmpty().stateIn(viewModelScope).value) {
+                for (i in 1..100) {
+                    val p = PasswordInfo(
+                        i,
+                        "devtitans #$i",
+                        "devtitans #$i",
+                        "devtitans #$i",
+                        "devtitans #$i"
+                    )
+                    Log.d("ListViewModel", "Password: $p")
+                    passwordDBStore.add(p.toPassword())
+                }
+            }
+            dataList = passwordDBStore.getList().map { list ->
+                list.map { it.toPasswordInfo() }
+            }.stateIn(viewModelScope).value as MutableList<PasswordInfo>
+
+            dataList.forEach {
+                Log.d("ListViewModel", "Checking Password: $it")
+            }
+
             collectData()
         }
     }
 
     fun collectData() {
         viewModelScope.launch {
-            dbSimulator.getData().collect {
-                listState = listState.copy(listState = it, size = it.size)
+            Log.d("ListViewModel", "Collecting data")
+            delay(5000)
+            listState = ListViewState(dataList, dataList.size)
+            listState.listState.forEach {
+                Log.d("ListViewModel", "ListState Password: $it")
             }
         }
     }
@@ -125,12 +87,12 @@ class ListViewModel @Inject constructor(
 
 @Composable
 fun Hello_screen(modifier: Modifier, viewModel: ListViewModel = hiltViewModel()) {
-    val listViewState: listViewState = viewModel.listState
+    val listViewState: ListViewState = viewModel.listState
 
     Box(
         modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
-        if (listViewState.listState.size == 0) {
+        if (listViewState.listState.isEmpty()) {
             Text("Carregando...", fontSize = 20.sp)
         } else {
             Column() {
@@ -145,9 +107,11 @@ fun Hello_screen(modifier: Modifier, viewModel: ListViewModel = hiltViewModel())
                 LazyColumn {
                     items(listViewState.listState.size) { index ->
                         Text(
-                            text = listViewState.listState[index],
+                            text = getPasswordAsText(listViewState, index),
                             fontSize = 20.sp,
-                            modifier = Modifier.padding(16.dp).fillMaxWidth()
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
                         )
                     }
                 }
@@ -156,6 +120,20 @@ fun Hello_screen(modifier: Modifier, viewModel: ListViewModel = hiltViewModel())
 
         }
     }
+}
+
+private fun getPasswordAsText(
+    listViewState: ListViewState,
+    index: Int
+): String {
+    val pi = listViewState.listState[index]
+    val sb = StringBuilder()
+    sb.append("ID: ${pi.id}\n")
+    sb.append("Nome: ${pi.name}\n")
+    sb.append("Login: ${pi.login}\n")
+    sb.append("Pass: ${pi.password}\n")
+    sb.append("Notes: ${pi.notes}\n")
+    return sb.toString()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
