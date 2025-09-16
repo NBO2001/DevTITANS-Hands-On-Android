@@ -14,69 +14,56 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class Screen() {
 
-    @Serializable
-    object Login;
+  @Serializable object Login
 
-    @Serializable
-    data class Hello(
-        val name: String?
-    )
+  @Serializable data class Hello(val name: String?)
 
-    @Serializable
-    object Preferences;
+  @Serializable object Preferences
 
-    @Serializable
-    object List
+  @Serializable object List
 
-    @Serializable
-    data class EditList(
-        val password: PasswordInfo
-    );
+  @Serializable data class EditList(val password: PasswordInfo)
 
-    @Serializable
-    object sensors;
+  @Serializable object sensors
 }
 
 @Composable
 fun rememberPlainTextAppState(
-    navController: NavHostController = rememberNavController(),
-    context: Context = LocalContext.current
-) = remember(navController, context) {
-    PlainTextAppState(navController, context)
-}
+        navController: NavHostController = rememberNavController(),
+        context: Context = LocalContext.current
+) = remember(navController, context) { PlainTextAppState(navController, context) }
 
+class PlainTextAppState(val navController: NavHostController, private val context: Context) {
 
-class PlainTextAppState(
-    val navController: NavHostController,
-    private val context: Context
-) {
+  fun checkRoute(route: String): Boolean {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route.toString()
 
-    fun checkRoute(route: String): Boolean {
-        val currentRoute = navController.currentBackStackEntry?.destination?.route.toString()
+    return currentRoute != route
+  }
 
-        return currentRoute != route
-    }
+  fun navigateToHello(name: String?) {
+    navController.navigate(Screen.Hello(name))
+  }
 
-    fun navigateToHello(name: String?){
-        navController.navigate(Screen.Hello(name))
-    }
+  fun navigateToLogin() {
+    navController.navigate(Screen.Login)
+  }
 
-    fun navigateToLogin(){
-        navController.navigate(Screen.Login)
-    }
+  fun navigateToListPasswords() {
+    navController.navigate(Screen.List)
+  }
 
-    fun navigateToListPasswords(){
-        navController.navigate(Screen.List)
-    }
+  fun navigateToEditPassword(password: PasswordInfo) {
+    navController.navigate(Screen.EditList(password))
+  }
 
-    fun navigateToEditPassword(password: PasswordInfo){
-        navController.navigate(Screen.EditList(password))
-    }
+  fun navigateToSettings() {
+    navController.navigate(Screen.Preferences)
+  }
 
-    fun back(){
-        navController.popBackStack()
-    }
-
+  fun back() {
+    navController.popBackStack()
+  }
 }
 
 /**
@@ -85,4 +72,6 @@ class PlainTextAppState(
  * This is used to de-duplicate navigation events.
  */
 private fun NavBackStackEntry.lifecycleIsResumed() =
-    this.lifecycle.currentState == Lifecycle.State.RESUMED
+        this.lifecycle.currentState == Lifecycle.State.RESUMED
+
+//this.lifecycle.currentState == Lifecycle.State.RESUMED

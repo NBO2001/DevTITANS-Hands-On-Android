@@ -1,0 +1,61 @@
+package com.example.plaintext.ui.viewmodel
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+data class LoginState(
+        var salvarLogin: Boolean = false,
+        var login: String = "",
+        val navigateToSettings: () -> Unit = {},
+        val navigateToList: (name: String) -> Unit = {},
+        val checkCredentials: (login: String, password: String) -> Boolean = { _, _ -> true },
+)
+
+@HiltViewModel
+class LoginViewModel @Inject constructor() : ViewModel() {
+
+  // O estado privado e o estado público para o Composable
+  var loginState by mutableStateOf(LoginState())
+    private set
+
+  // Campos de texto e estado de salvamento
+  var login = mutableStateOf("")
+  var senha = mutableStateOf("")
+  var salvarLogin = mutableStateOf(false)
+
+  init {
+    // atribui login para o valor padrão definido nas preferencias
+    loginState = loginState.copy(login = getDefaultLoginFromPreferences())
+  }
+
+  fun getDefaultLoginFromPreferences(): String {
+    // TODO: Buscar o valor padrão nas preferências
+    return "default login"
+  }
+
+  fun onLoginClick() {
+    viewModelScope.launch {
+      // Simular uma verificação assíncrona
+      delay(200)
+      if (loginState.checkCredentials(login.value, senha.value)) {
+        // Atualizar a função de navegação
+        loginState.navigateToList(login.value)
+      } else {
+        // Mostra um toast com a mensagem de credenciais invalidas
+        println("Credenciais inválidas")
+      }
+    }
+  }
+
+  // Função para atualizar o estado com base nas ações de navegação do Composable
+  fun updateLoginState(newState: LoginState) {
+    loginState = newState
+  }
+}
