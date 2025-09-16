@@ -1,9 +1,11 @@
 android-studio/
 android-studio-2024.*
-*idea
-*gradle
 Jetcastersample/*idea
 Jetcastersample/local.properties
 PlainText/.gradle/*
 PlainText/*idea/
 PlainText/local.properties
+.idea/
+.gradle/
+local.properties
+
