@@ -74,4 +74,4 @@ class PlainTextAppState(val navController: NavHostController, private val contex
 private fun NavBackStackEntry.lifecycleIsResumed() =
         this.lifecycle.currentState == Lifecycle.State.RESUMED
 
-this.lifecycle.currentState == Lifecycle.State.RESUMED
+//this.lifecycle.currentState == Lifecycle.State.RESUMED
