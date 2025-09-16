@@ -15,16 +15,10 @@ class EditPasswordViewModel @Inject constructor(
     fun savePassword(password: PasswordInfo) {
         viewModelScope.launch {
             if (password.id > 0) {
-               updatePassword(password)
+                passwordDBStore.update(password.toPassword())
             } else {
                 passwordDBStore.add(password.toPassword())
             }
-        }
-    }
-
-    fun updatePassword(password: PasswordInfo) {
-        viewModelScope.launch {
-            passwordDBStore.update(password.toPassword())
         }
     }
 }
