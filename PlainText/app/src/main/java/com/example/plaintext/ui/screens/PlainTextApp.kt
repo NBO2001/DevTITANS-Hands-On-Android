@@ -13,34 +13,27 @@ import com.example.plaintext.utils.parcelableType
 import kotlin.reflect.typeOf
 
 @Composable
-fun PlainTextApp(
-    appState: PlainTextAppState = rememberPlainTextAppState()
-) {
-    NavHost(
-        navController = appState.navController,
-        startDestination = Screen.List,
-    ) {
-        composable<Screen.Hello> {
-            var args = it.toRoute<Screen.Hello>()
-            Hello_screen(args)
-        }
-        composable<Screen.Login> {
-            Login_screen(
-                navigateToSettings = {},
-                navigateToList = {}
-            )
-        }
-        composable<Screen.List> {
-            List_screen(appState)
-        }
-        composable<Screen.EditList>(
-            typeMap = mapOf(typeOf<PasswordInfo>() to parcelableType<PasswordInfo>())
-        ) {
-            val args = it.toRoute<Screen.EditList>()
-            Edit_screen(
-                args,
-                appState
-            )
-        }
+fun PlainTextApp(appState: PlainTextAppState = rememberPlainTextAppState()) {
+  NavHost(
+          navController = appState.navController,
+          startDestination = Screen.Login,
+  ) {
+    composable<Screen.Hello> {
+      var args = it.toRoute<Screen.Hello>()
+      Hello_screen(args)
     }
+    composable<Screen.Login> {
+      Login_screen(
+              navigateToSettings = { appState.navigateToSettings() },
+              navigateToList = { appState.navigateToListPasswords() }
+      )
+    }
+    composable<Screen.List> { List_screen(appState) }
+    composable<Screen.EditList>(
+            typeMap = mapOf(typeOf<PasswordInfo>() to parcelableType<PasswordInfo>())
+    ) {
+      val args = it.toRoute<Screen.EditList>()
+      Edit_screen(args, appState)
+    }
+  }
 }
