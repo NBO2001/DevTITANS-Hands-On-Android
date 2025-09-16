@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.plaintext.data.model.PasswordInfo
-import com.example.plaintext.ui.screens.editList.EditList
+import com.example.plaintext.ui.screens.editList.Edit_screen
 import com.example.plaintext.ui.screens.hello.Hello_screen
 import com.example.plaintext.ui.screens.list.List_screen
 import com.example.plaintext.ui.screens.login.Login_screen
@@ -14,7 +14,7 @@ import kotlin.reflect.typeOf
 
 @Composable
 fun PlainTextApp(
-    appState: JetcasterAppState = rememberJetcasterAppState()
+    appState: PlainTextAppState = rememberPlainTextAppState()
 ) {
     NavHost(
         navController = appState.navController,
@@ -37,10 +37,9 @@ fun PlainTextApp(
             typeMap = mapOf(typeOf<PasswordInfo>() to parcelableType<PasswordInfo>())
         ) {
             val args = it.toRoute<Screen.EditList>()
-            EditList(
+            Edit_screen(
                 args,
-                navigateBack = {appState.navController.popBackStack()},
-                savePassword = {appState.navController.popBackStack() }
+                appState
             )
         }
     }

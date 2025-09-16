@@ -25,7 +25,9 @@ object DataDiModule {
             appContext,
             PlainTextDatabase::class.java,
             "plaint_text_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
