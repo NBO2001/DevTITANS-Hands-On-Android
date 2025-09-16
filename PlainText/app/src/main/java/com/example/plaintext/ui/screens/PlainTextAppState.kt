@@ -31,7 +31,7 @@ sealed class Screen() {
     object Preferences;
 
     @Serializable
-    object List;
+    object List
 
     @Serializable
     data class EditList(
