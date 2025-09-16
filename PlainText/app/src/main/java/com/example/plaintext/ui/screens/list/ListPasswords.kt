@@ -22,16 +22,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.plaintext.R
 import com.example.plaintext.data.model.PasswordInfo
-import com.example.plaintext.ui.screens.JetcasterAppState
-import com.example.plaintext.ui.screens.Screen
-import com.example.plaintext.ui.viewmodel.ListViewModel
+import com.example.plaintext.ui.screens.PlainTextAppState
+import com.example.plaintext.ui.viewmodel.ListPasswordsViewModel
 import com.example.plaintext.ui.viewmodel.ListViewState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun List_screen(
-    appState: JetcasterAppState,
-    viewModel: ListViewModel = hiltViewModel()
+    appState: PlainTextAppState,
+    viewModel: ListPasswordsViewModel = hiltViewModel()
 ) {
     val listState = viewModel.listViewState
 
@@ -45,14 +44,14 @@ fun List_screen(
             FloatingActionButton(
                 onClick = {
                     val newPassword = PasswordInfo(
-                        id = -1,
+                        id = 0,
                         name = "",
                         login = "",
                         password = "",
                         notes = ""
                     )
                     Log.d("ListScreen", "Navigating to EditScreen with password: $newPassword")
-                    appState.navController.navigate(Screen.EditList(newPassword))
+                    appState.navigateToEditPassword(newPassword)
                 },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.secondary
@@ -66,7 +65,7 @@ fun List_screen(
             listState = listState,
             onItemClick = { password ->
                 Log.d("ListScreen", "Navigating to EditScreen with password: $password")
-                appState.navController.navigate(Screen.EditList(password))
+                appState.navigateToEditPassword(password)
             }
         )
     }

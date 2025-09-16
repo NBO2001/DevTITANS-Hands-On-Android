@@ -1,5 +1,6 @@
 package com.example.plaintext.utils
 
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
@@ -21,21 +22,22 @@ import kotlinx.serialization.json.Json
  * Parcelable em strings JSON e vice-versa. A compatibilidade com diferentes versões do Android é garantida
  * através de verificações de versão.
  */
-inline fun <reified T : Parcelable> parcelableType(
+inline fun <reified T> parcelableType(
     isNullableAllowed: Boolean = false,
-    json: Json = Json,
+    json: Json = Json
 ) = object : NavType<T>(isNullableAllowed = isNullableAllowed) {
-    override fun get(bundle: Bundle, key: String) =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            bundle.getParcelable(key, T::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            bundle.getParcelable(key)
-        }
+    override fun get(bundle: Bundle, key: String): T? {
+        val str = bundle.getString(key) ?: return null
+        return json.decodeFromString(str)
+    }
 
-    override fun parseValue(value: String): T = json.decodeFromString(value)
+    override fun parseValue(value: String): T =
+        json.decodeFromString(Uri.decode(value))
 
-    override fun serializeAsValue(value: T): String = json.encodeToString(value)
+    override fun serializeAsValue(value: T): String =
+        Uri.encode(json.encodeToString(value))
 
-    override fun put(bundle: Bundle, key: String, value: T) = bundle.putParcelable(key, value)
+    override fun put(bundle: Bundle, key: String, value: T) {
+        bundle.putString(key, json.encodeToString(value))
+    }
 }

@@ -8,4 +8,5 @@
     <string name="empty_list">Empty list</string>
     <string name="no_passwords_found">No Passwords found</string>
     <string name="add_password_prompt">Add Password Prompt</string>
+    <string name="save">Save</string>
 </resources>

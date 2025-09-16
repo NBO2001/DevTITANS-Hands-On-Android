@@ -1,17 +1,12 @@
 package com.example.plaintext.ui.screens
 
 import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.plaintext.data.model.PasswordInfo
 import kotlinx.serialization.Serializable
@@ -43,15 +38,15 @@ sealed class Screen() {
 }
 
 @Composable
-fun rememberJetcasterAppState(
+fun rememberPlainTextAppState(
     navController: NavHostController = rememberNavController(),
     context: Context = LocalContext.current
 ) = remember(navController, context) {
-    JetcasterAppState(navController, context)
+    PlainTextAppState(navController, context)
 }
 
 
-class JetcasterAppState(
+class PlainTextAppState(
     val navController: NavHostController,
     private val context: Context
 ) {
@@ -68,6 +63,18 @@ class JetcasterAppState(
 
     fun navigateToLogin(){
         navController.navigate(Screen.Login)
+    }
+
+    fun navigateToListPasswords(){
+        navController.navigate(Screen.List)
+    }
+
+    fun navigateToEditPassword(password: PasswordInfo){
+        navController.navigate(Screen.EditList(password))
+    }
+
+    fun back(){
+        navController.popBackStack()
     }
 
 }
