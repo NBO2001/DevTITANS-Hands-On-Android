@@ -2,15 +2,12 @@ package com.example.plaintext.data.di
 
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.createSavedStateHandle
 import androidx.room.Room
 import com.example.plaintext.data.PlainTextDatabase
+import com.example.plaintext.data.SimulatorDatabase
 import com.example.plaintext.data.dao.PasswordDao
 import com.example.plaintext.data.repository.LocalPasswordDBStore
 import com.example.plaintext.data.repository.PasswordDBStore
-import com.example.plaintext.ui.screens.hello.ListViewModel
-import com.example.plaintext.ui.screens.hello.dbSimulator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,11 +20,26 @@ import javax.inject.Singleton
 object DataDiModule {
     @Provides
     @Singleton
-    fun providePasswordDao(
+    fun provideAppDatabase(@ApplicationContext appContext: Context): PlainTextDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            PlainTextDatabase::class.java,
+            "plaint_text_database"
+        ).build()
+    }
+
+    @Provides
+    fun providePasswordDao(plainTextDatabase: PlainTextDatabase): PasswordDao {
+        return plainTextDatabase.passwordDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePasswordDBStore(
         passwordDao: PasswordDao
     ): PasswordDBStore = LocalPasswordDBStore(passwordDao)
 
     @Provides
-	@Singleton
-	fun provideDBSimulator(): dbSimulator = dbSimulator()
+    @Singleton
+    fun provideDBSimulator(): SimulatorDatabase = SimulatorDatabase()
 }
