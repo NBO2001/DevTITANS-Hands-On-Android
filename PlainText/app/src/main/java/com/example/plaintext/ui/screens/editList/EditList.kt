@@ -1,274 +1,198 @@
 package com.example.plaintext.ui.screens.editList
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.plaintext.R
 import com.example.plaintext.data.model.PasswordInfo
+import com.example.plaintext.ui.screens.PlainTextAppState
 import com.example.plaintext.ui.screens.Screen
-import com.example.plaintext.ui.screens.login.TopBarComponent
-import com.example.plaintext.ui.screens.util.MyTopBar
-import com.example.plaintext.ui.theme.*
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-
-
-enum class PasswordFormMode { CREATE, EDIT }
+import com.example.plaintext.ui.viewmodel.EditPasswordViewModel
 
 data class EditListState(
-    val name: String = "",
-    val user: String = "",
-    val password: String = "",
-    val notes: String = ""
+    val nameState: String = "",
+    val usernameState: String = "",
+    val passwordState: String = "",
+    val notesState: String = ""
 )
 
-fun isPasswordEmpty(password: PasswordInfo): Boolean {
-    return  password.name.isEmpty() &&
-            password.login.isEmpty() &&
-            password.password.isEmpty() &&
-            password.notes.isEmpty()
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun EditList(
+fun Edit_screen(
     args: Screen.EditList,
-    navigateBack: () -> Unit,
-    savePassword: (password: PasswordInfo) -> Unit
+    appState: PlainTextAppState,
+    viewModel: EditPasswordViewModel = hiltViewModel()
 ) {
-    PasswordForm(
-        mode = PasswordFormMode.EDIT,
-        initial = EditListState(
-            name = args.password.name,
-            user = args.password.login,
-            password = args.password.password,
-            notes = args.password.notes
-        ),
-        onBack = navigateBack,
-        onSave = { updated -> savePassword(
-            args.password.copy(
-                name = updated.name,
-                login = updated.user,
-                password = updated.password,
-                notes = updated.notes
-            )
-        )}
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordForm(
-    mode: PasswordFormMode,
-    initial: EditListState = EditListState(),
-    onBack: () -> Unit,
-    onSave: (EditListState) -> Unit
-){
-    var name by rememberSaveable { mutableStateOf(initial.name) }
-    var user by rememberSaveable { mutableStateOf(initial.user) }
-    var password by rememberSaveable { mutableStateOf(initial.password) }
-    var notes by rememberSaveable { mutableStateOf(initial.notes) }
-
-    val title = when (mode) {
-        PasswordFormMode.CREATE -> "Criar nova senha"
-        PasswordFormMode.EDIT -> "Editar senha"
+    // Initialize EditListState with values from args
+    val editListState = remember {
+        EditListState(
+            nameState = args.password.name,
+            usernameState = args.password.login,
+            passwordState = args.password.password,
+            notesState = args.password.notes
+        )
     }
 
     Scaffold(
-        topBar = { MyTopBar(title = title, onBack = onBack) }
-    ){ innerPadding ->
+        topBar = {
+            TopBarComponent(
+                title = if (args.password.id > 0) "Edit Password" else "Add Password",
+                showBackButton = true,
+                onBackClick = appState::back
+            )
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            var name by remember { mutableStateOf(editListState.nameState) }
+            var username by remember { mutableStateOf(editListState.usernameState) }
+            var password by remember { mutableStateOf(editListState.passwordState) }
+            var notes by remember { mutableStateOf(editListState.notesState) }
+
             EditInput(
-                textInputLabel = "Nome",
+                label = "Name",
                 value = name,
-                onValueChange = { name = it },
-                imeAction = ImeAction.Next
+                onValueChange = { name = it }
             )
-
             EditInput(
-                textInputLabel = "Usuário",
-                value = user,
-                onValueChange = { user = it },
-                imeAction = ImeAction.Next
+                label = "Username/Login",
+                value = username,
+                onValueChange = { username = it }
             )
-
             EditInput(
-                textInputLabel = "Senha",
+                label = "Password",
                 value = password,
-                onValueChange = { password = it },
-                keyboardType = "password",
-                imeAction = ImeAction.Next
+                onValueChange = { password = it }
             )
-
             EditInput(
-                textInputLabel = "Notas",
+                label = "Notes",
                 value = notes,
                 onValueChange = { notes = it },
-                textInputHeight = 150,
-                keyboardType = "text",
-                imeAction = ImeAction.Done
+                inputHeight = 120
             )
 
-            Spacer(Modifier.height(24.dp))
-            Button(
-                onClick = { onSave(EditListState(name, user, password, notes)) },
-                colors = ButtonDefaults.buttonColors( containerColor = Lime)
-            ) {
-                Text("Salvar")
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
+            Button(
+                onClick = {
+                    val passwordInfo = PasswordInfo(
+                        id = args.password.id,
+                        name = name,
+                        login = username,
+                        password = password,
+                        notes = notes
+                    )
+                    viewModel.savePassword(passwordInfo)
+                    appState.back()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.save))
+            }
         }
     }
 }
 
-
 @Composable
 fun EditInput(
-    textInputLabel: String,
+    label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    textInputHeight: Int = 60,
-    keyboardType: String = "text",
-    imeAction: ImeAction = ImeAction.Default
+    inputHeight: Int = 60
 ) {
-    val padding = 30
-    var showPassword by rememberSaveable { mutableStateOf(false) }
-    val isPasswordField = keyboardType == "password"
-
-    Row(
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
         modifier = Modifier
             .fillMaxWidth()
-            .height(textInputHeight.dp)
-            .padding(horizontal = padding.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(textInputLabel) },
-            modifier = Modifier
-                .height(textInputHeight.dp)
-                .fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = when (keyboardType) {
-                    "text" -> KeyboardType.Text
-                    "number" -> KeyboardType.Number
-                    "password" -> KeyboardType.Password
-                    else -> KeyboardType.Text
-                },
-                imeAction = imeAction
-            ),
-            visualTransformation = if (isPasswordField && !showPassword) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
-            trailingIcon = {
-                if (isPasswordField) {
-                    IconButton(onClick = { showPassword = !showPassword }) {
-                        Icon(
-                            imageVector =
-                                if (showPassword) Icons.Filled.VisibilityOff
-                                else Icons.Filled.Visibility,
-                            contentDescription = if (showPassword) "Ocultar senha" else "Mostrar senha"
-                        )
-                    }
-                }
-            }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(10.dp))
-}
-
-
-/* ===========================
-   PREVIEWS
-   =========================== */
-
-@Preview(showBackground = true, backgroundColor = 0xFF261307)
-@Composable
-fun AddPasswordPreview() {
-    PasswordForm(
-        mode = PasswordFormMode.CREATE,
-        onBack = {},
-        onSave = {}
+            .height(inputHeight.dp)
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF261307)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPasswordPreview() {
-    PasswordForm(
-        mode = PasswordFormMode.EDIT,
-        initial = EditListState(
-            name = "Facebook",
-            user = "devtitans",
-            password = "123",
-            notes = "Bla bla"
-        ),
-        onBack = {},
-        onSave = {}
+fun TopBarComponent(
+    title: String,
+    showBackButton: Boolean = false,
+    onBackClick: () -> Unit = {}
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        navigationIcon = {
+            if (showBackButton) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack, // Replace with your back arrow drawable
+                        contentDescription = "Back"
+                    )
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun EditListPreview() {
-    EditList(
-        Screen.EditList(PasswordInfo(1, "Nome", "Usuário", "Senha", "Notas")),
-        navigateBack = {},
-        savePassword = {}
+    val nav = rememberNavController()
+    val context = nav.context
+    val state = PlainTextAppState(nav, context)
+    val viewModel = hiltViewModel<EditPasswordViewModel>()
+    Edit_screen(
+        Screen.EditList(PasswordInfo(0, "Name", "Username", "Password", "Notes")),
+        state,
+        viewModel
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun EditInputPreview() {
-    EditInput("Nome", "Usuário", {})
+    EditInput(
+        label = "Name",
+        value = "",
+        onValueChange = {}
+    )
 }
