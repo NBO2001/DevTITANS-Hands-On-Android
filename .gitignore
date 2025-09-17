@@ -1,5 +1,6 @@
 android-studio/
 android-studio-2024.*
+<<<<<<< HEAD
 *idea
 *gradle
 Jetcastersample/*idea
@@ -7,3 +8,8 @@ Jetcastersample/local.properties
 PlainText/.gradle/*
 PlainText/*idea/
 PlainText/local.properties
+=======
+.idea/
+.gradle/
+local.properties
+>>>>>>> 5915f5e (feat: pull resquest template)
