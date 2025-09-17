@@ -1,136 +1,224 @@
 package com.example.plaintext.ui.screens.list
 
 import android.content.res.Configuration
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.ScrollableDefaults
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.plaintext.R
-import com.example.plaintext.ui.screens.login.TopBarComponent
+import com.example.plaintext.data.model.PasswordInfo
+import com.example.plaintext.ui.screens.JetcasterAppState
+import com.example.plaintext.ui.screens.Screen
 import com.example.plaintext.ui.viewmodel.ListViewModel
 import com.example.plaintext.ui.viewmodel.ListViewState
-import androidx.compose.foundation.overscroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.plaintext.data.model.PasswordInfo
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListView(
-) {}
-
-@Composable
-fun AddButton(onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = { onClick() },
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.secondary
-    ) {
-        Icon(Icons.Filled.Add, "Small floating action button.")
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ListItemContent(
-    modifier: Modifier,
-    listState: ListViewState,
-    navigateToEdit: (password: PasswordInfo) -> Unit
+fun List_screen(
+    appState: JetcasterAppState,
+    viewModel: ListViewModel = hiltViewModel()
 ) {
-        when {
-            !listState.isCollected -> {
-                LoadingScreen()
-            }
+    val listState = viewModel.listViewState
 
-            else -> {
-                LazyColumn(
-                    modifier = modifier
-                        .fillMaxSize()
-                ) {
-                    items(listState.passwordList.size) {
-                        ListItem(
-                            listState.passwordList[it],
-                            navigateToEdit
-                        )
-                    }
-                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.app_name)) }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val newPassword = PasswordInfo(
+                        id = -1,
+                        name = "",
+                        login = "",
+                        password = "",
+                        notes = ""
+                    )
+                    Log.d("ListScreen", "Navigating to EditScreen with password: $newPassword")
+                    appState.navController.navigate(Screen.EditList(newPassword))
+                },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.secondary
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_new_password))
             }
         }
-}
-
-@Composable
-fun LoadingScreen() {
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text("Carregando")
+    ) { innerPadding ->
+        ListContent(
+            modifier = Modifier.padding(innerPadding),
+            listState = listState,
+            onItemClick = { password ->
+                Log.d("ListScreen", "Navigating to EditScreen with password: $password")
+                appState.navController.navigate(Screen.EditList(password))
+            }
+        )
     }
 }
 
 @Composable
-fun ListItem(
-    password: PasswordInfo,
-    navigateToEdit: (password: PasswordInfo) -> Unit
+fun ListContent(
+    modifier: Modifier = Modifier,
+    listState: ListViewState,
+    onItemClick: (PasswordInfo) -> Unit
 ) {
-    val title = password.name
-    val subTitle = password.login
+    when {
+        !listState.isCollected -> LoadingScreen()
+        listState.passwordList.isEmpty() -> EmptyListScreen()
+        else -> PasswordList(
+            modifier = modifier,
+            passwords = listState.passwordList,
+            onItemClick = onItemClick
+        )
+    }
+}
 
+@Composable
+fun PasswordList(
+    modifier: Modifier = Modifier,
+    passwords: List<PasswordInfo>,
+    onItemClick: (PasswordInfo) -> Unit
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(passwords.size) { index ->
+            PasswordItem(
+                password = passwords[index],
+                onClick = { onItemClick(passwords[index]) }
+            )
+        }
+    }
+}
+
+@Composable
+fun PasswordItem(
+    password: PasswordInfo,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
-            .clickable { navigateToEdit(password) }
-            .padding(horizontal = 10.dp),
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Logo",
-            modifier = Modifier.fillMaxHeight()
+            contentDescription = stringResource(R.string.password_icon),
+            modifier = Modifier.size(40.dp)
         )
+        Spacer(modifier = Modifier.width(16.dp))
         Column(
-            modifier = Modifier
-                .weight(.7f)
-                .padding(horizontal = 5.dp),
+            modifier = Modifier.weight(1f)
         ) {
-            Text(title, fontSize = 20.sp)
-            Text(subTitle, fontSize = 14.sp)
+            Text(
+                text = password.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontSize = 20.sp
+            )
+            Text(
+                text = password.login,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Menu",
-            tint = Color.White
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = stringResource(R.string.navigate_to_edit),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
+@Composable
+fun LoadingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.loading),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+fun EmptyListScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = stringResource(R.string.empty_list),
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        )
+        Text(
+            text = stringResource(R.string.no_passwords_found),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.add_password_prompt),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark List")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light List")
+@Composable
+fun ListScreenPreview() {
+    val mockState = ListViewState(
+        passwordList = listOf(
+            PasswordInfo(1, "Site Example", "user123", "strongPassword", "Notes here"),
+            PasswordInfo(2, "App XYZ", "email@domain.com", "securePass123", "")
+        ),
+        isCollected = true
+    )
+    MaterialTheme {
+        ListContent(listState = mockState, onItemClick = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Empty List")
+@Composable
+fun EmptyListPreview() {
+    MaterialTheme {
+        EmptyListScreen()
+    }
+}
+
+@Preview(showBackground = true, name = "Loading")
+@Composable
+fun LoadingPreview() {
+    MaterialTheme {
+        LoadingScreen()
+    }
+}
