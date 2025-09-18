@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,14 +17,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.plaintext.data.PreferencesRepository
 import com.example.plaintext.ui.screens.login.TopBarComponent
 import com.example.plaintext.ui.screens.util.PreferenceInput
 import com.example.plaintext.ui.screens.util.PreferenceItem
 import com.example.plaintext.ui.viewmodel.PreferencesState
 import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import kotlinx.coroutines.delay
+import com.example.plaintext.ui.screens.util.MyTopBar
 
 @Composable
 fun SettingsScreen(navController: NavHostController?,
@@ -31,7 +35,10 @@ fun SettingsScreen(navController: NavHostController?,
 ){
     Scaffold(
         topBar = {
-            TopBarComponent()
+            MyTopBar(
+                title = "Configurações",
+                onBack = { navController?.popBackStack() }
+            )
         }
     ){ padding ->
         SettingsContent(modifier = Modifier.padding(padding), viewModel)
@@ -49,10 +56,10 @@ fun SettingsContent(modifier: Modifier = Modifier, viewModel: PreferencesViewMod
         PreferenceInput(
             title = "Preencher Login",
             label = "Login",
-            fieldValue = "",
+            fieldValue = viewModel.preferencesState.login,
             summary = "Preencher login na tela inicial"
-        ){
-            // função para alterar o login
+        ){ newlogin ->
+            viewModel.updateLogin(newlogin)
         }
 
         PreferenceInput(
@@ -60,21 +67,21 @@ fun SettingsContent(modifier: Modifier = Modifier, viewModel: PreferencesViewMod
             label = "Label",
             fieldValue = "",
             summary = "Senha para entrar no sistema"
-        ){
-            // função para alterar a senha
+        ){ newPassword ->
+            viewModel.updatePassword(newPassword)
         }
 
         PreferenceItem(
             title = "Preencher Login",
             summary = "Preencher login na tela inicial",
             onClick = {
-                // deve alterar o estado que representa se o switch está ligado ou não
+                viewModel.updatePreencher(!viewModel.getPreencher())
             },
             control = {
                 Switch(
-                    checked = false, // deve ler o estado que representa se o switch está ligado ou não
+                    checked = viewModel.getPreencher(), // deve ler o estado que representa se o switch está ligado ou não
                     onCheckedChange = {
-                        // deve alterar o estado que representa se o switch está ligado ou não
+                        viewModel.updatePreencher(it)
                     }
                 )
             }
@@ -82,8 +89,13 @@ fun SettingsContent(modifier: Modifier = Modifier, viewModel: PreferencesViewMod
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 360)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen(null)
+    val previewRepo = PreferencesRepository()
+    val previewVm = PreferencesViewModel(SavedStateHandle(), previewRepo)
+    SettingsContent(
+        modifier = Modifier,
+        viewModel = previewVm
+    )
 }
