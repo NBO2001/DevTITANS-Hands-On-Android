@@ -25,6 +25,9 @@ import com.example.plaintext.data.model.PasswordInfo
 import com.example.plaintext.ui.screens.PlainTextAppState
 import com.example.plaintext.ui.viewmodel.ListPasswordsViewModel
 import com.example.plaintext.ui.viewmodel.ListViewState
+import androidx.activity.compose.BackHandler
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +36,12 @@ fun List_screen(
     viewModel: ListPasswordsViewModel = hiltViewModel()
 ) {
     val listState = viewModel.listViewState
+    val context = LocalContext.current
+    val message = stringResource(R.string.disabled_back_button)
+
+    BackHandler(enabled = true) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
 
     Scaffold(
         topBar = {
