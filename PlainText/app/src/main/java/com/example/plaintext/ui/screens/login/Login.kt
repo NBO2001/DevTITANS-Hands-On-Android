@@ -260,9 +260,10 @@ fun TopBarComponent(
 @Composable
 fun LoginScreenPreview() {
   // Para o Preview, podemos passar lambdas vazios ou mockados
-  Login_screen(
+    val previewRepo = com.example.plaintext.data.PreferencesRepository()
+    Login_screen(
           navigateToSettings = { Log.d("Preview", "Navegar para Configurações (Preview)") },
           navigateToList = { Log.d("Preview", "Navegar para Lista com nome: (Preview)") },
-          viewModel = LoginViewModel() // Instância simples para o preview
-  )
+          viewModel = LoginViewModel(repo = previewRepo ) // Instância simples para o preview
+    )
 }

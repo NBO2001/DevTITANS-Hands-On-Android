@@ -9,6 +9,7 @@ import com.example.plaintext.ui.screens.editList.Edit_screen
 import com.example.plaintext.ui.screens.hello.Hello_screen
 import com.example.plaintext.ui.screens.list.List_screen
 import com.example.plaintext.ui.screens.login.Login_screen
+import com.example.plaintext.ui.screens.preferences.SettingsScreen
 import com.example.plaintext.utils.parcelableType
 import kotlin.reflect.typeOf
 
@@ -34,6 +35,10 @@ fun PlainTextApp(appState: PlainTextAppState = rememberPlainTextAppState()) {
     ) {
       val args = it.toRoute<Screen.EditList>()
       Edit_screen(args, appState)
+    }
+
+    composable<Screen.Preferences> {
+      SettingsScreen(navController = appState.navController)
     }
   }
 }
