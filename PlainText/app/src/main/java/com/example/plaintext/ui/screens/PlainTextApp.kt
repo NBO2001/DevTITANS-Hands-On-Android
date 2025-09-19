@@ -19,7 +19,7 @@ fun PlainTextApp(appState: PlainTextAppState = rememberPlainTextAppState()) {
           startDestination = Screen.Login,
   ) {
     composable<Screen.Hello> {
-      var args = it.toRoute<Screen.Hello>()
+      val args = it.toRoute<Screen.Hello>()
       Hello_screen(args)
     }
     composable<Screen.Login> {
