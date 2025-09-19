@@ -10,4 +10,12 @@
     <string name="add_password_prompt">Add Password Prompt</string>
     <string name="save">Save</string>
     <string name="disabled_back_button">Back button disabled on this screen</string>
+    <string name="the_best_password_manager">O melhor gerenciador de senhas</string>
+    <string name="login_text_button">Entrar</string>
+    <string name="sign_up">Cadastrar</string>
+    <string name="logout">Sair</string>
+    <string name="settings">Configurações</string>
+    <string name="about">Sobre</string>
+    <string name="menu_content">Menu content</string>
+    <string name="plaintext_password_manager_v1_0">PlainText Password Manager v1.0</string>
 </resources>
