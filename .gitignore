@@ -1,11 +1,30 @@
-android-studio/
-android-studio-2024.*
-Jetcastersample/*idea
-Jetcastersample/local.properties
-PlainText/.gradle/*
-PlainText/*idea/
-PlainText/local.properties
+# IDE
+android-studio*/
 .idea/
+*.iml
+
+# Gradle
 .gradle/
+build/
+*/build/
+
+# Local configs
 local.properties
 
+# Kotlin
+.kotlin/
+
+# Logs e caches
+*.log
+captures/
+
+# Android
+.externalNativeBuild/
+.cxx/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+#GitHub
+.github/
