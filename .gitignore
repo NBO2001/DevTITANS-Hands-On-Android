@@ -7,8 +7,7 @@ Jetcastersample/*idea
 Jetcastersample/local.properties
 PlainText/.gradle/*
 PlainText/*idea/
-PlainText/local.properties
-=======
+PlainText/local.properties=======
 .idea/
 .gradle/
 local.properties

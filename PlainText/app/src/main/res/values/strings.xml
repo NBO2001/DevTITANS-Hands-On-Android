@@ -9,4 +9,5 @@
     <string name="no_passwords_found">No Passwords found</string>
     <string name="add_password_prompt">Add Password Prompt</string>
     <string name="save">Save</string>
+    <string name="disabled_back_button">Back button disabled on this screen</string>
 </resources>
