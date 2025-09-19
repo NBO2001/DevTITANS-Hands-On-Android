@@ -1,14 +1,30 @@
-android-studio/
-android-studio-2024.*
-<<<<<<< HEAD
-*idea
-*gradle
-Jetcastersample/*idea
-Jetcastersample/local.properties
-PlainText/.gradle/*
-PlainText/*idea/
-PlainText/local.properties=======
+# IDE
+android-studio*/
 .idea/
+*.iml
+
+# Gradle
 .gradle/
+build/
+*/build/
+
+# Local configs
 local.properties
->>>>>>> 5915f5e (feat: pull resquest template)
+
+# Kotlin
+.kotlin/
+
+# Logs e caches
+*.log
+captures/
+
+# Android
+.externalNativeBuild/
+.cxx/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+#GitHub
+.github/
