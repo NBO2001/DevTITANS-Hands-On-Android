@@ -24,7 +24,6 @@ fun PlainTextApp(appState: PlainTextAppState = rememberPlainTextAppState()) {
     }
     composable<Screen.Login> {
       Login_screen(
-              navigateToSettings = { appState.navigateToSettings() },
               navigateToList = { appState.navigateToListPasswords() }
       )
     }
